@@ -35,12 +35,14 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../trevor-lee-student-code/module-2/04_INSERT_UPDATE_DELETE/exercise" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../trevor-lee-student-code/module-2/14_Server_Side_APIs_Part_2/exercise" />
   </component>
-  <component name="RunManager" selected="JUnit.VendingMachineTest">
+  <component name="RunManager" selected="Application.Application">
     <configuration name="Application" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="ALTERNATIVE_JRE_PATH" value="11" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="com.techelevator.Application" />
-      <module name="m1-java-capstone-vending-machine" />
+      <module name="VendingMachine" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="com.techelevator.*" />
@@ -66,22 +68,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="VendingMachineTest.addToSalesReport_modifies_sales_report_file_properly" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="m1-java-capstone-vending-machine" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.techelevator.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="com.techelevator" />
-      <option name="MAIN_CLASS_NAME" value="com.techelevator.VendingMachineTest" />
-      <option name="METHOD_NAME" value="addToSalesReport_modifies_sales_report_file_properly" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="VendingMachineTest.finishTransaction_returns_3_quarter_1_dime_1_nickel_given_balance_of_0_90" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="m1-java-capstone-vending-machine" />
       <extension name="coverage">
@@ -94,6 +80,20 @@
       <option name="MAIN_CLASS_NAME" value="com.techelevator.VendingMachineTest" />
       <option name="METHOD_NAME" value="finishTransaction_returns_3_quarter_1_dime_1_nickel_given_balance_of_0_90" />
       <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="com.techelevator in VendingMachine" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="VendingMachine" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.techelevator.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.techelevator" />
+      <option name="TEST_OBJECT" value="package" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -114,11 +114,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.Application" />
+        <item itemvalue="JUnit.com.techelevator in VendingMachine" />
         <item itemvalue="JUnit.VendingMachineTest" />
         <item itemvalue="JUnit.VendingMachineTest.finishTransaction_returns_3_quarter_1_dime_1_nickel_given_balance_of_0_90" />
-        <item itemvalue="Application.Application" />
         <item itemvalue="JUnit.com.techelevator in m1-java-capstone-vending-machine" />
-        <item itemvalue="JUnit.VendingMachineTest.addToSalesReport_modifies_sales_report_file_properly" />
       </list>
     </recent_temporary>
   </component>

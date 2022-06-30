@@ -1,214 +1,93 @@
 package com.techelevator;
 
-import java.io.*;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
+import com.techelevator.Exceptions.*;
 import com.techelevator.snacks.*;
 
 public class VendingMachine {
 
-    private final String INVENTORY_FILE_PATH = "vendingmachine.csv";
-    private final String LOG_FILE_PATH = "Log.txt";
-    public final String SALES_REPORT_FILE_PATH = "SalesReport.txt";
-    public final String INSUFFICIENT_FUNDS = "Insufficient balance; please insert more funds";
+    public final VendingMachineDao dao;
+    private final Map<String, SnackSlot> inventory;
 
-    private Map<String, Snack> inventory = new HashMap<>();
+    private int balance = 0;
 
-    private double balance = 0;
-
-    public VendingMachine() {
-        initializeLog();
-        initializeSalesReport();
-        stockInventory();
+    public VendingMachine(VendingMachineDao dao) {
+        this.dao = dao;
+        inventory = dao.getInventory();
     }
 
-    public double getBalance() {
+    public int getBalance() {
         return balance;
     }
 
-    public Map<String, Snack> getInventory() {
+    public String getBalanceAsMoney() {
+        return intCentsToStringDollars(balance);
+    }
+
+    public Map<String, SnackSlot> getInventory() {
         return inventory;
     }
-    private void initializeSalesReport() {
-        File salesReport = new File(SALES_REPORT_FILE_PATH);
-        if (!salesReport.exists()) {
-            try {
-                salesReport.createNewFile();
-                try (PrintWriter writer = new PrintWriter(salesReport);
-                    Scanner reader = new Scanner(new File(INVENTORY_FILE_PATH))
-                ) {
-                  while (reader.hasNextLine()) {
-                      String[] snackEntryLineArray = reader.nextLine().split("\\|");
-                      writer.println(snackEntryLineArray[1] + "|0");
-                  }
-                }
-            } catch (IOException e) {
-                System.out.println("Failed to initialize sales report!");
-            }
+
+    public Snack purchaseSnack(String slot)
+            throws InvalidSlotException, SnackSoldOutException, InsufficientFundsException {
+        if (!inventory.containsKey(slot)) {
+            throw new InvalidSlotException();
+        }
+        SnackSlot snackSlot = inventory.get(slot);
+        if (snackSlot.isEmpty()) {
+            throw new SnackSoldOutException();
+        }
+        if (balance < snackSlot.price) {
+            throw new InsufficientFundsException();
         }
 
-    }
-
-    private void initializeLog() {
-        File log = new File(LOG_FILE_PATH);
-        if (!log.exists()) {
-            try {
-                log.createNewFile();
-            } catch (IOException e) {
-                System.out.println("Failed to initialize log!");
-            }
-        }
-    }
-
-    private void stockInventory() {
-        File inventoryFile = new File(INVENTORY_FILE_PATH);
-        try (Scanner scanner = new Scanner(inventoryFile)) {
-            while (scanner.hasNextLine()) {
-                String[] inventoryEntry = scanner.nextLine().split("\\|");
-                String slot = inventoryEntry[0];
-                String name = inventoryEntry[1];
-                double price = Double.parseDouble(inventoryEntry[2]);
-                String type = inventoryEntry[3];
-
-                Snack snack;
-                switch (type) {
-                    case "Chip":
-                        snack = new Chip(name, price);
-                        break;
-                    case "Candy":
-                        snack = new Candy(name, price);
-                        break;
-                    case "Drink":
-                        snack = new Drink(name, price);
-                        break;
-                    case "Gum":
-                        snack = new Gum(name, price);
-                        break;
-                    default:
-                        snack = null;
-                }
-                inventory.put(slot, snack);
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println("Failed to stock Vending Machine!");
-        }
-    }
-
-    public String purchaseSnack(String slot) {
-        Snack snackToPurchase = inventory.get(slot);
-
-        if (snackToPurchase.getStockAmount() < 1) {
-            return "SOLD OUT";
-        } else if (balance < snackToPurchase.getSnackPrice()) {
-            return INSUFFICIENT_FUNDS;
-        } else {
-            double newBalance = balance - snackToPurchase.getSnackPrice();
-            logAction(snackToPurchase.getSnackName() + " " + slot, balance, newBalance);
-            addToSalesReport(snackToPurchase.getSnackName());
-            snackToPurchase.decrementStock();
-            balance = newBalance;
-            return snackToPurchase.getSnackMessage();
-        }
-    }
-
-    public double insertMoney(int dollarAmount) {
-        double newBalance = balance + dollarAmount;
-        logAction("FEED MONEY:", balance, newBalance);
+        Snack snack = snackSlot.dequeue();
+        int newBalance = balance - snackSlot.price;
+        dao.logAction(snack.snackName + " " + slot, balance, newBalance);
+        dao.addToSalesReport(snack.snackName);
         balance = newBalance;
-        return balance;
+        return snack;
     }
 
-    public String finishTransaction() {
-
-        double changeAmount = balance;
-        int quarterCount = 0;
-        int dimeCount = 0;
-        int nickelCount = 0;
-        String quartersMessage = "";
-        String dimesMessage = "";
-        String nickelsMessage = "";
-
-        while (balance >= .25) {
-            quarterCount++;
-            balance -= 0.25;
-        }
-        while (balance >= 0.10) {
-            dimeCount++;
-            balance -= 0.10;
-        }
-        while (balance >= 0.05) {
-            nickelCount++;
-            balance -= 0.05;
-        }
-        if (quarterCount > 0) {
-            quartersMessage = quarterCount == 1 ? " 1 quarter   " : quarterCount + " quarters   ";
-        }
-        if (dimeCount > 0) {
-            dimesMessage = dimeCount == 1 ? " 1 dime   " : dimeCount + " dimes   ";
-        }
-        if (nickelCount > 0) {
-            nickelsMessage = nickelCount == 1 ? " 1 nickel" : nickelCount + "nickels";
-        }
-        logAction("GIVE CHANGE:", changeAmount, balance);
-
-        return "Please take your change: " + NumberFormat.getCurrencyInstance().format(changeAmount) + " -----> " + quartersMessage + dimesMessage + nickelsMessage;
+    public void insertMoney(int insertedCents) {
+        int newBalance = balance + insertedCents;
+        dao.logAction("FEED MONEY:", balance, newBalance);
+        balance = newBalance;
     }
 
-    public void logAction(String type, double beforeBalance, double afterBalance) {
-        try (PrintWriter writer = new PrintWriter(new FileOutputStream(LOG_FILE_PATH, true))) {
-            String formattedBeforeBalance = NumberFormat.getCurrencyInstance().format(beforeBalance);
-            String formattedAfterBalance = NumberFormat.getCurrencyInstance().format(afterBalance);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm a");
-            String formattedDate = LocalDateTime.now().format(formatter);
-            String logMessage = formattedDate + " " + type + " " + formattedBeforeBalance + " " + formattedAfterBalance;
-            writer.println(logMessage);
-        } catch (FileNotFoundException e) {
-            System.out.println("Error: " + LOG_FILE_PATH + " not found!");
+    public Map<String, Integer> finishTransaction() {
+        Map<String, Integer> change = new HashMap<>();
+        int changeAmount = balance;
+
+        while (balance >= 25) {
+            change.put("quarters", change.containsKey("quarters") ? change.get("quarters") + 1 : 1);
+            balance -= 25;
         }
+        while (balance >= 10) {
+            change.put("dimes", change.containsKey("dimes") ? change.get("dimes") + 1 : 1);
+            balance -= 10;
+        }
+        while (balance >= 5) {
+            change.put("nickels", change.containsKey("nickels") ? change.get("nickels") + 1 : 1);
+            balance -= 5;
+        }
+
+        dao.logAction("GIVE CHANGE:", changeAmount, balance);
+
+        return change;
     }
 
-    public void addToSalesReport(String productName) {
-        File tempSalesReport = new File("SalesReportTempFile.txt");
-        File salesReport = new File(SALES_REPORT_FILE_PATH);
-        try {
-            tempSalesReport.createNewFile();
-        } catch (IOException e) {
-            System.out.println("Create Temp File failed.");
-        }
-        try (PrintWriter writer = new PrintWriter(tempSalesReport);
-            Scanner fileReader = new Scanner(salesReport)
-        ) {
-            while (fileReader.hasNextLine()) {
-                String soldProductLine = fileReader.nextLine();
-                String[] soldProductLineArray = soldProductLine.split("\\|");
-                if (soldProductLineArray[0].equals(productName)) {
-                    try {
-                        int cumulativeSales = Integer.parseInt(soldProductLineArray[1]) + 1;
-                        soldProductLineArray[1] = String.valueOf(cumulativeSales);
-                    } catch (NumberFormatException e) {
-                        System.out.println("Where's my number??");
-                    }
-                }
-                soldProductLine = String.join("|", soldProductLineArray);
-                writer.println(soldProductLine);
-            }
 
-        } catch (FileNotFoundException e) {
-            System.out.println("Error: " + SALES_REPORT_FILE_PATH + " not found!");
-        } catch (SecurityException e) {
-            System.out.println("Security Error");
-        }
-        try {
-            salesReport.delete();
-            tempSalesReport.renameTo(new File(SALES_REPORT_FILE_PATH));
-        } catch (Exception e) {
-            System.out.println("Failed to replace sales report with updated report.");
-        }
+    public static String intCentsToStringDollars(int cents) {
+        int num = cents;
+        int val1 = num % 10;
+        num /= 10;
+        int val2 = num % 10;
+        num /= 10;
+        return "$" + num + "." + val2 + val1;
     }
+
+
+
 }

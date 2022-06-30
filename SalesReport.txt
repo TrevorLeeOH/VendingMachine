@@ -1,16 +1,16 @@
-Potato Crisps|27
+Potato Crisps|5
 Stackers|0
 Grain Waves|0
 Cloud Popcorn|0
 Moonpie|0
 Cowtales|0
 Wonka Bar|0
-Crunchie|2
-Cola|12
+Crunchie|0
+Cola|5
 Dr. Salt|0
-Mountain Melter|2
-Heavy|1
-U-Chews|12
-Little League Chew|4
-Chiclets|2
-Triplemint|1
+Mountain Melter|1
+Heavy|0
+U-Chews|0
+Little League Chew|2
+Chiclets|1
+Triplemint|0
