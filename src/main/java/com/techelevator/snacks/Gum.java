@@ -2,9 +2,8 @@ package com.techelevator.snacks;
 
 public class Gum extends Snack {
 
-    public Gum (String snackName, double snackPrice) {
-        super(snackName, snackPrice);
-
+    public Gum (String snackName) {
+        super(snackName);
     }
 
     @Override
@@ -13,5 +12,9 @@ public class Gum extends Snack {
     }
 
 
+    @Override
+    public Snack duplicate() {
+        return new Gum(snackName);
+    }
 
 }
